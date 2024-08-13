@@ -1,0 +1,23 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+.cache
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+
+models/*
+summaries/*
+/src/tmp
+/Output
+
+# Scenarios
+/src/scenarios/Sumo/**/*.rou.xml
+/src/scenarios/Sumo/**/*.sumocfg
+/src/Logs/*
+/Logs/*
