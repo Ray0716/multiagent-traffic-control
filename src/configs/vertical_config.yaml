@@ -44,7 +44,7 @@ parameters:
     scene: 'vertical_intersection'
     env_type: 'SUMO'
 
-    gui: True
+    gui: False
 
     type: 'byCorners'
     speed_dev: 0.0

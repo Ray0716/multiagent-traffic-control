@@ -1,5 +1,5 @@
 import matplotlib.pyplot as plt
-plt.style.use('seaborn')
+#plt.style.use('seaborn')
 import csv
 import numpy as np
 import math

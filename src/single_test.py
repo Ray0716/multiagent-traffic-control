@@ -9,9 +9,18 @@ import os
 import csv
 from torch import load as torchLoad
 from matplotlib import pyplot as plt
-from utils import *
+import matplotlib as mpl
+from cycler import cycler
 
-plt.style.use('ggplot')
+
+from utils import *
+import csv
+import os
+
+from datetime import datetime # get date and time, declare curr date and time, make string and makenew csv file for each run if record date is true
+now = datetime.now()
+dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
+
 
 
 timestep_list = []
@@ -19,7 +28,33 @@ reward_list = []
 speed_list = []
 num_v_list = []
 
+timestep_with_variables_list = [['Timestep', 'Reward', 'Num Vehicles', 'Speed']]
+
+
+'''
+folderPath = "src/csv_data_"
+csvFileName = dt_string + "_simulation_data.csv"
+
+csvFilePath = os.path.join(folderPath, csvFileName)
+
+with open(csvFilePath, mode='w', newline='') as file:
+    writer = csv.writer(file)'''
+
 SAMPLE_FREQUENCY = 1 # every x timesteps it samples data 
+RECORD_DATA_TO_CSV = True # records datat into new csv file
+
+CSV_FILE_NAME = 'csv_data_/test_pr_0.2_reward.csv'
+
+plt.style.use('seaborn-v0_8-pastel')
+
+
+
+'''
+if RECORD_DATA_TO_CSV and not os.path.isfile("src/csv_data_" + csvFilePath): # if we wanna record and our sv not exist
+    with open(csvFilePath, 'w') as csvFile:
+        pass'''
+
+
 
 
 def evaluateAgent(agent, env, num_sim, eval_index, save_dir):
@@ -76,19 +111,35 @@ def evaluateAgent(agent, env, num_sim, eval_index, save_dir):
                 simulation_waitingtime.append(reward_info['waiting']/num_vehicles)
                 simulation_vehicles.append(num_vehicles)
 
-            if time_step % SAMPLE_FREQUENCY == 0: # added ------------------------------------------------------------------------
-                timestep_list.append(time_step)
-                reward_list.append(reward)
-                num_v_list.append(num_vehicles)
 
-                if num_vehicles == 0:
-                    speed_list.append(reward_info['speed'])
-                else:
-                    speed_list.append(reward_info['speed']/num_vehicles)
+            
+            
+            if time_step % SAMPLE_FREQUENCY != 0: # added ------------------------------------------------------------------------
+                continue # add guard clause to AVOID NESTED FOR LOOPS
+
+            timestep_list.append(time_step)
+            reward_list.append(reward)
+            num_v_list.append(num_vehicles)
+
+            if num_vehicles == 0: # take care of division by 0 error, this only affects the first data point
+                speed_list.append(reward_info['speed'])
+            else:
+                speed_list.append(reward_info['speed']/num_vehicles)
+
+            if RECORD_DATA_TO_CSV and num_vehicles != 0:
+                #timestep_with_variables_list.append([time_step, reward, num_vehicles, reward_info['speed']])
+            #elif RECORD_DATA_TO_CSV and num_vehicles != 0:
+                timestep_with_variables_list.append([time_step, reward, num_vehicles, reward_info['speed']/num_vehicles])
+
+            
+
+            
+                
 
 
 
         if terminate:
+            
             observation, run_stats = env.reset(single=-1)
             obs_channelled = makeChannelled(observation, 0, 0)
 
@@ -186,7 +237,8 @@ if __name__ == '__main__':
 
     printNewLine(2)
 
-    TOTAL_TIME_STEPS = int(3e3)
+
+    TOTAL_TIME_STEPS = int(5e4) # 5e4 for training
     STACK_FRAMES = 1
     INPUT_SHAPE = [STACK_FRAMES, 84, 84]
     DISCOUNT = 0.99
@@ -194,7 +246,8 @@ if __name__ == '__main__':
     EXPLORATION_RATE = 1e-1
     MEM_SIZE = int(1)
     NUM_BATCHES = 32
-    EVALUATE_STEPS = int(1e4)
+    FREEZE_INTERVAL = int(3e3)
+    EVALUATE_STEPS = int(5e4) # change from 1e4 to 5e4
     EVALUATE_SIMULATIONS = 1 # changed from 3 to 1
 
     env = SumoGymAdapter(CURRENT_DIR, OUTPUT_DIR, parameters)
@@ -210,7 +263,7 @@ if __name__ == '__main__':
     agent.getModel().eval()
 
     eval_index = 0
-    for time_step in range(TOTAL_TIME_STEPS, -1, -EVALUATE_STEPS):
+    for time_step in range(TOTAL_TIME_STEPS, 0, -EVALUATE_STEPS):
         eval_index = int(time_step/EVALUATE_STEPS)
         chkpt_file = CHECKPOINT_FILE.format(time_step=time_step)
         if not os.path.exists(chkpt_file):
@@ -238,33 +291,37 @@ if __name__ == '__main__':
     logger.info(getLineDash())
     env.close()
 
-    plt.plot(timestep_list, speed_list)
-    plt.ylabel('speed')
-    plt.xlabel('timestep')
-    plt.show()
 
-    plt.plot(timestep_list, reward_list)
-    plt.ylabel('reward')
-    plt.xlabel('timestep')
-    plt.show()
+    # write to csv ----------------------------------------------------------------------------------------
+    #print(timestep_with_variables_list)
+    if RECORD_DATA_TO_CSV:
+        with open(CSV_FILE_NAME, 'w', newline='') as csvfile:
+            writer = csv.writer(csvfile)
+            writer.writerows(timestep_with_variables_list)
 
+    # plotting ------with_variables----------------------------------------------------------------------------
 
     fig, ax1 = plt.subplots()
 
-    color = 'tab:red'
+    #mpl.rcParams['axes.prop_cycle'] = cycler(color=['r', 'g', 'b', 'y'])
+    
+
     ax1.set_xlabel('timestep')
-    ax1.set_ylabel('avg speed', color=color)
-    ax1.plot(timestep_list, speed_list, color=color)
-    ax1.tick_params(axis='y', labelcolor=color)
+    ax1.set_ylabel('avg speed')
+    ax1.plot(timestep_list, speed_list, color = '#ec5f59')
+    ax1.tick_params(axis='y')
 
     ax2 = ax1.twinx()  # instantiate a second Axes that shares the same x-axis
 
-    color = 'tab:blue'
-    ax2.set_ylabel('reward', color=color)  # we already handled the x-label with ax1
-    ax2.plot(timestep_list, reward_list, color=color)
-    ax2.tick_params(axis='y', labelcolor=color)
+
+    ax2.set_ylabel('reward')  # we already handled the x-label with ax1
+    ax2.plot(timestep_list, reward_list, color = '#417dc0')
+    ax2.tick_params(axis='y')
 
     fig.tight_layout()  # otherwise the right y-label is slightly clipped
+
+    plt.grid(axis='both')
+
     plt.show()
 
 

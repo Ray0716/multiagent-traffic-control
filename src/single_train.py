@@ -89,7 +89,7 @@ if __name__ == '__main__':
 
     printNewLine(2)
 
-    TOTAL_TIME_STEPS = int(1e3)
+    TOTAL_TIME_STEPS = int(5e4) # how long it trian for
     STACK_FRAMES = 1
     INPUT_SHAPE = [STACK_FRAMES, 84, 84]
     DISCOUNT = 0.99
@@ -97,8 +97,8 @@ if __name__ == '__main__':
     EXPLORATION_RATE = 1e-1
     MEM_SIZE = int(1000)
     NUM_BATCHES = 32
-    FREEZE_INTERVAL = int(3e4)
-    EVALUATE_STEPS = int(1e3)
+    FREEZE_INTERVAL = int(3e3)
+    EVALUATE_STEPS = int(1e4) # how often save checkpoint
 
     env = SumoGymAdapter(CURRENT_DIR, OUTPUT_DIR, parameters)
     env_stepLength = env.getStepLength()
@@ -262,8 +262,6 @@ if __name__ == '__main__':
                     timestep_list.append(time_step)
 
 
-
-
                 simulation_speed.append(reward_info['speed']/num_vehicles)
                 simulation_accel.append(reward_info['accel']/num_vehicles)
                 simulation_delay.append(reward_info['delay']/num_vehicles)
@@ -352,6 +350,9 @@ if __name__ == '__main__':
     logger.info("Closing env...")
     logger.info(getLineDash())
     env.close()
+
+    print(timestep_list)
+    print(reward_list)
 
     plt.plot(timestep_list, reward_list)
     plt.ylabel('reward')
