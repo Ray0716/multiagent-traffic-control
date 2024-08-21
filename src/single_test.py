@@ -28,7 +28,7 @@ reward_list = []
 speed_list = []
 num_v_list = []
 
-timestep_with_variables_list = [['Timestep', 'Reward', 'Num Vehicles', 'Speed']]
+timestep_with_variables_list = [['Timestep', 'Reward', 'Num Vehicles', 'Speed', 'Waiting time']]
 
 
 '''
@@ -43,7 +43,7 @@ with open(csvFilePath, mode='w', newline='') as file:
 SAMPLE_FREQUENCY = 1 # every x timesteps it samples data 
 RECORD_DATA_TO_CSV = True # records datat into new csv file
 
-CSV_FILE_NAME = 'csv_data_/test_pr_0.2_reward.csv'
+CSV_FILE_NAME = 'csv_data_/test_pr_0.05.csv'
 
 plt.style.use('seaborn-v0_8-pastel')
 
@@ -129,7 +129,7 @@ def evaluateAgent(agent, env, num_sim, eval_index, save_dir):
             if RECORD_DATA_TO_CSV and num_vehicles != 0:
                 #timestep_with_variables_list.append([time_step, reward, num_vehicles, reward_info['speed']])
             #elif RECORD_DATA_TO_CSV and num_vehicles != 0:
-                timestep_with_variables_list.append([time_step, reward, num_vehicles, reward_info['speed']/num_vehicles])
+                timestep_with_variables_list.append([time_step, reward, num_vehicles, reward_info['speed']/num_vehicles, reward_info['waiting']/num_vehicles])
 
             
 
@@ -238,7 +238,7 @@ if __name__ == '__main__':
     printNewLine(2)
 
 
-    TOTAL_TIME_STEPS = int(5e4) # 5e4 for training
+    TOTAL_TIME_STEPS = int(1e5) # 5e4 for training
     STACK_FRAMES = 1
     INPUT_SHAPE = [STACK_FRAMES, 84, 84]
     DISCOUNT = 0.99
@@ -247,7 +247,7 @@ if __name__ == '__main__':
     MEM_SIZE = int(1)
     NUM_BATCHES = 32
     FREEZE_INTERVAL = int(3e3)
-    EVALUATE_STEPS = int(5e4) # change from 1e4 to 5e4
+    EVALUATE_STEPS = int(1e4) # change from 1e4 to 5e4, chaned to total time step because weonly want last chpt
     EVALUATE_SIMULATIONS = 1 # changed from 3 to 1
 
     env = SumoGymAdapter(CURRENT_DIR, OUTPUT_DIR, parameters)
@@ -263,23 +263,27 @@ if __name__ == '__main__':
     agent.getModel().eval()
 
     eval_index = 0
-    for time_step in range(TOTAL_TIME_STEPS, 0, -EVALUATE_STEPS):
-        eval_index = int(time_step/EVALUATE_STEPS)
-        chkpt_file = CHECKPOINT_FILE.format(time_step=time_step)
-        if not os.path.exists(chkpt_file):
-            logger.info(f"Checkpoint file: {chkpt_file} doesn't exist. Skipping")
-            continue
-        checkpoint = torchLoad(chkpt_file)
+    
+    '''for time_step in range(TOTAL_TIME_STEPS, 0, -EVALUATE_STEPS):'''
+    time_step = int(1e6)
+    eval_index = 1
+    chkpt_file = CHECKPOINT_FILE.format(time_step=time_step)
+    if not os.path.exists(chkpt_file):
+        logger.info(f"Checkpoint file: {chkpt_file} doesn't exist. Skipping")
+        #continue
+    checkpoint = torchLoad(chkpt_file)
 
-        logger.info(getLineDash())
-        logger.info(f"Running evaluation #{eval_index}")
-        logger.info(f"Checkpoint file used: {chkpt_file}")
-        logger.info(getLineDash())
-        printNewLine(2)
+    logger.info(getLineDash())
+    logger.info(f"Running evaluation #{eval_index}")
+    logger.info(f"Checkpoint file used: {chkpt_file}")
+    logger.info(getLineDash())
+    printNewLine(2)
 
-        agent.loadModel(checkpoint['model_state_dict'])
+    agent.loadModel(checkpoint['model_state_dict'])
 
-        evaluateAgent(agent, env, EVALUATE_SIMULATIONS, eval_index, RESULT_DIR)
+    evaluateAgent(agent, env, EVALUATE_SIMULATIONS, eval_index, RESULT_DIR)
+
+    # ---- end of for loop
 
     logger.info(getLineDash())
     logger.info(f"Total number of evaluations: {eval_index}")

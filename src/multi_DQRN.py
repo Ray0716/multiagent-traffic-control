@@ -63,9 +63,9 @@ class ModelDQN(nn.Module):
         )
         if nature:
             self.conv_layers = nn.Sequential(
-                nn.Conv2d(input_shape[0], 32, kernel_size=8, stride=4),
+                nn.Conv2d(input_shape[0], 32, kernel_size=8, stride=4), #input
                 nn.ReLU(),
-                nn.Conv2d(32, 64, kernel_size=4, stride=2),
+                nn.Conv2d(32, 64, kernel_size=4, stride=2), 
                 nn.ReLU(),
                 nn.Conv2d(64, 64, kernel_size=3, stride=1),
                 nn.ReLU()
@@ -108,7 +108,7 @@ class AgentDQN:
         self._model_target = ModelDQN(self._input_shape, self._output_num)
         self.syncModels()
         self._optim = optim.Adam(self._model.parameters(), lr=self._lr)
-        self._device = torch.device('cpu')
+        self._device = torch.device('mps')
         print(f"Current torch device: {self._device}")
         self._model.to(self._device)
         self._model_target.to(self._device)

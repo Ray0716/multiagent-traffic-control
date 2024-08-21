@@ -38,7 +38,7 @@ parameters:
     route_min_segments: 1
     route_segments: ['5i 1i 4o', '4i 1o 5o', '2i 3o', '3i 2o', '6i 7o', '7i 6o']
 
-    car_pr: 0.2 #changed from 0.2 to 1.0
+    car_pr: 0.05 #changed from 0.2 to 1.0
     car_tm: 3600
 
     scene: 'vertical_intersection'

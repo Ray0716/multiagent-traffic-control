@@ -16,7 +16,7 @@ from matplotlib import pyplot as plt
 from utils import *
 
 
-SAMPLE_FREQUENCY = 5 # every 5 timesteps it samples
+SAMPLE_FREQUENCY = 20 # every 5 timesteps it samples
 
 timestep_list = []
 reward_list = []
@@ -89,13 +89,13 @@ if __name__ == '__main__':
 
     printNewLine(2)
 
-    TOTAL_TIME_STEPS = int(5e4) # how long it trian for
+    TOTAL_TIME_STEPS = int(1e6) # how long it trian for
     STACK_FRAMES = 1
     INPUT_SHAPE = [STACK_FRAMES, 84, 84]
     DISCOUNT = 0.99
     LR = 25e-5
     EXPLORATION_RATE = 1e-1
-    MEM_SIZE = int(1000)
+    MEM_SIZE = int(1000) # changed from 1000 to 100
     NUM_BATCHES = 32
     FREEZE_INTERVAL = int(3e3)
     EVALUATE_STEPS = int(1e4) # how often save checkpoint
