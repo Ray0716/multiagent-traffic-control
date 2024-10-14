@@ -41,7 +41,7 @@ with open(csvFilePath, mode='w', newline='') as file:
     writer = csv.writer(file)'''
 
 SAMPLE_FREQUENCY = 1 # every x timesteps it samples data 
-RECORD_DATA_TO_CSV = True # records datat into new csv file
+RECORD_DATA_TO_CSV = False # records datat into new csv file
 
 CSV_FILE_NAME = 'csv_data_/test_pr_0.05.csv'
 
@@ -179,7 +179,8 @@ if __name__ == '__main__':
     CURRENT_DIR = os.getcwd()
 
     CONFIG_DIR = os.path.join(CURRENT_DIR, "configs")
-    CONFIG_FILE = os.path.join(CONFIG_DIR, "vertical_config.yaml")
+    #CONFIG_FILE = os.path.join(CONFIG_DIR, "vertical_config.yaml")
+    CONFIG_FILE = "/Users/Ray/compSci/germany-ai-research/TrafficRL-cf221df0620f0a3eed7af6ac95248bf4d44196c3/src/configs/vertical_config.yaml"
     parameters = None
     with open(CONFIG_FILE, 'r') as stream:
         parameters = yaml.safe_load(stream)['parameters']
@@ -267,7 +268,7 @@ if __name__ == '__main__':
     '''for time_step in range(TOTAL_TIME_STEPS, 0, -EVALUATE_STEPS):'''
     time_step = int(1e6)
     eval_index = 1
-    chkpt_file = CHECKPOINT_FILE.format(time_step=time_step)
+    chkpt_file = CHECKPOINT_FILE.format(time_step=time_step) # set which checkpoint we want to test
     if not os.path.exists(chkpt_file):
         logger.info(f"Checkpoint file: {chkpt_file} doesn't exist. Skipping")
         #continue
